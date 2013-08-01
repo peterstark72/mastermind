@@ -67,16 +67,47 @@ def feedback(code, guesses):
 
 
 
+class Game:
+
+	def __init__(self):
+		self.code = gencode()
+		self.turns = 0
+
+
+	def makeguess(self, pegs):
+		self.feedback = feedback(self.code, pegs)
+		self.turns += 1
+
+
 
 if __name__ == '__main__':
 
-	c = gencode() 
-	print c
+	g = Game()
 
-	g = gencode()
-	print g
+	done = False
+	while not done:
 
-	f = feedback(c, g)
-	print f
+		s = raw_input()
+		if s == 'q':
+			sys.exit("Goodbye!")
+
+		guess = map(int, s.split())
+		g.makeguess(guess)
+
+		print "{:>20}".format(g.feedback)
+
+		if g.feedback == (4,0):
+			sys.exit("You made it!")
+
+
+
+
+
+
+
+
+
+
+
 
 	
