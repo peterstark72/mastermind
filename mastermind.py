@@ -94,7 +94,7 @@ if __name__ == '__main__':
 		guess = map(int, s.split())
 		g.makeguess(guess)
 
-		print "{:>20}".format(g.feedback)
+		print "{:>20}: {}".format(g.turns, g.feedback)
 
 		if g.feedback == (4,0):
 			sys.exit("You made it!")
