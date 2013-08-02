@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import unittest
+import math
 
 import mastermind
 
@@ -17,7 +18,7 @@ class TestMasterMind(unittest.TestCase):
 		guess = (1,1,1,2) 
 
 		fb = mastermind.feedback(code, guess)
-		self.assertTrue(fb == (3,0))
+		self.assertTrue(fb == (3,0), "{} {} {}".format(code, guess, fb))
 
 
 	def test_duplicates2(self):
@@ -26,7 +27,7 @@ class TestMasterMind(unittest.TestCase):
 		guess = (1,2,2,2)
 
 		fb = mastermind.feedback(code, guess)
-		self.assertTrue(fb == (2,0))
+		self.assertTrue(fb == (2,0), "{} {} {}".format(code, guess, fb))
 
 	def test_duplicates3(self):
 		'''More duplcates in code than guesses'''
@@ -34,7 +35,7 @@ class TestMasterMind(unittest.TestCase):
 		guess = [5, 5, 3, 2]
 
 		fb = mastermind.feedback(code, guess)
-		self.assertTrue(fb == (1,1))
+		self.assertTrue(fb == (1,1), "{} {} {}".format(code, guess, fb))
 				
 
 	def test_duplicates4(self):
@@ -42,7 +43,23 @@ class TestMasterMind(unittest.TestCase):
 		guess = [0, 3, 1, 1]
 
 		fb = mastermind.feedback(code, guess)
-		self.assertTrue(fb == (1,1))
+		self.assertTrue(fb == (1,1), "{} {} {}".format(code, guess, fb))
+
+
+	def test_duplicates5(self):
+		code = [2, 2, 5, 3]
+		guess = [1, 1, 2, 2]
+
+		fb = mastermind.feedback(code, guess)
+		self.assertTrue(fb == (0,2), "{} {} {}".format(code, guess, fb))
+
+
+	def test_duplicates6(self):
+		code = [5, 5, 0, 3]
+		guess = [1, 1, 2, 2]
+
+		fb = mastermind.feedback(code, guess)
+		self.assertTrue(fb == (0,0), "{} {} {}".format(code, guess, fb))
 
 
 
@@ -68,6 +85,24 @@ class TestMasterMind(unittest.TestCase):
 
 		fb = mastermind.feedback(code, guess)
 		self.assertTrue(fb == (0,4))
+
+
+	def test_calc(self):
+		p = mastermind.calcperm(0,0,6,4)
+		self.assertEqual(p, math.pow(6,4))
+
+	def test_calc2(self):
+		p = mastermind.calcperm(6,0,6,4)
+		self.assertEqual(p, 1)
+
+	def test_calc3(self):
+		p = mastermind.calcperm(1,1,6,4)
+		self.assertEqual(p, 180)
+
+	def test_calc4(self):
+		p = mastermind.calcperm(3,1,6,4)
+		self.assertEqual(p, 5)
+
 
 
 if __name__ == '__main__':

@@ -36,12 +36,12 @@ def gencode(colors=DEFAULT_COLORS, holes=DEFAULT_HOLES):
 
 
 
-def feedback(code, guesses):
+def feedback(code, pegs):
 	'''Returns a tuple with the number of correct guesses (black) and the number of correct colors but wrong positions (white)
 
 	Args:
 	code - the code, e.g. (1,2,3,4)
-	guesses - the guess, e.g. (1,1,1,1)
+	pegs - the guess, e.g. (1,1,1,1)
 
 	Example: 
 	The code (1,2,3,4) and guess (1,1,1,1), will return (1,0) since only the first peg is correct. 
@@ -51,50 +51,83 @@ def feedback(code, guesses):
 	#First, get a set of all positions, e.g. 0,1,2,3,..
 	positions = set(range(len(code)))	
 
+
 	#Set of all black positions
-	blacks = set(
-		[pos for pos, guess in enumerate(guesses) if guess==code[pos]])
+	black_positions = set(
+		[pos for pos, peg in enumerate(pegs) if peg==code[pos]])
+	blacks = len(black_positions)
+
 
 	#Remaining set is all less the blacks
-	remains = positions - blacks
-	remain_code = set([code[pos] for pos in remains])
-	remain_guess = set([guesses[pos] for pos in remains])
-	
-	whites = remain_code & remain_guess
-	
+	remains_pos = positions - black_positions
+	remains = [code[pos] for pos in remains_pos]
 
-	return len(blacks), len(whites)
+	whites = 0
+	awarded_duplicates = set()
+	for pos in remains_pos:
+		color = pegs[pos]
+		if color in remains and pegs.count(color) <= code.count(color):
+			whites += 1
+		elif color in remains and color not in awarded_duplicates:
+			whites += 1
+			awarded_duplicates.add(color)
+
+	
+	return blacks, whites
+
+
+
+def calcperm(blacks, whites, colors = DEFAULT_COLORS, holes = DEFAULT_HOLES):
+	'''Calculates remaining possibilities'''
+
+	p = 1
+
+	#In white pos we know one color is wrong
+	for n in range(whites):
+		p *= colors-1
+
+	#In remaining pos still any color could be right		
+	for n in range(holes - blacks - whites):
+		p *= colors
+
+	return p
 
 
 
 class Game:
-	'''A simple game. 
-
-
-		g = Game()
-
-		g.guess((1,2,3,4))
-		g.guess((3,4,3,4))
-		g.guess((1,5,3,1))
-		g.guess((1,3,3,2))
-
-		g.is_gameover()
+	'''A simple Matstermind game. 
 
 	'''
-	
 
-	def __init__(self):
-		self.code = gencode()
+	MAX_TURNS = 10
+
+	def __init__(self, colors=DEFAULT_COLORS, holes=DEFAULT_HOLES):
+		'''Creates a game with give colors and number of holes'''
+		self.code = gencode(colors, holes)
+		self.number_of_holes = len(self.code)
+		self.colors = colors
+		self.holes = holes
 		self.turns = 0
+		self.blacks = 0
+		self.whites = 0
+
+		print "New game. Colors: {} in {} holes".format(range(colors), holes)
+
+		print "".join(map(str,self.code))
 
 
 	def guess(self, pegs):
-		self.feedback = feedback(self.code, pegs)
+		'''Returns True of the guess is correct or the number of turns equals Game.MAX_TURNS'''
 		self.turns += 1
+		self.blacks, self.whites = feedback(self.code, pegs)
+		
+		if self.turns == Game.MAX_TURNS or self.number_of_holes == self.blacks:
+			return True
 
 
-	def is_gameover(self):
-		return self.turns == 10 or self.feedback == (len(self.code),0)
+	@property			
+	def possibilities(self):
+		return calcperm(self.blacks, self.whites, self.colors, self.holes)
 
 
 
@@ -105,17 +138,14 @@ if __name__ == '__main__':
 	done = False
 	while not done:
 
-		print "{} / 10 $ ".format(g.turns)
 		s = raw_input()
 		if s == 'q' or not s:
 			sys.exit("Goodbye!")
 
-		pegs = map(int, s.split())
-		g.guess(pegs)
+		pegs = map(int, list(s))
+		done = g.guess(pegs)
 
-		print "{:>20}: {}".format(g.turns, g.feedback)
-
-		done = g.is_gameover()
+		print "{:>20}, {} ({})".format(g.blacks, g.whites, g.possibilities)
 
 	
 	sys.exit("You made it!")
